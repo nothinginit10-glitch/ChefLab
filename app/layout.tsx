@@ -1,0 +1,71 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { auth } from "@/lib/auth";
+import SessionProvider from "@/components/auth/SessionProvider";
+import Script from "next/script";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "ChefLab",
+  description:
+    "Smart culinary companion that reduces food waste by turning random leftovers into gourmet meals",
+  // Updated Icons configuration
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
+  // Google Search Console Verification
+  verification: {
+    google: "mk3o2lgavXTz12smdAaB0chv20Bnmyjy2GIUOJHMvX4",
+  },
+};
+
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
+
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script id="disable-context-menu" strategy="afterInteractive">
+          {`
+            // Disable right-click
+            document.addEventListener('contextmenu', (e) => {
+              e.preventDefault();
+              return false;
+            });
+
+            // Disable common keyboard shortcuts for copying
+            document.addEventListener('keydown', (e) => {
+              // Disable Ctrl+C, Ctrl+U (view source), F12 (devtools)
+              if (
+                (e.ctrlKey && (e.key === 'c' || e.key === 'u')) ||
+                e.key === 'F12'
+              ) {
+                e.preventDefault();
+                return false;
+              }
+            });
+
+            // Disable text selection on images
+            document.addEventListener('selectstart', (e) => {
+              if (e.target.tagName === 'IMG') {
+                e.preventDefault();
+                return false;
+              }
+            });
+          `}
+        </Script>
+      </head>
+      <body className={inter.className} suppressHydrationWarning>
+        <SessionProvider session={session}>{children}</SessionProvider>
+      </body>
+    </html>
+  );
+}
